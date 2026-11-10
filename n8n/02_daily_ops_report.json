@@ -1,0 +1,206 @@
+{
+  "name": "Rental ops 2: daily report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "5affcc54-a6ad-580a-bfc8-d9031a3958f1",
+      "name": "Every day 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        90
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "day",
+              "type": "number",
+              "value": "={{ Math.floor(($now.toMillis() - new Date($env.SEASON_START).getTime()) / 86400000) }}"
+            }
+          ]
+        }
+      },
+      "id": "a0d4dc26-8307-52d4-ab3a-4c3f6963ae2c",
+      "name": "Day number",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        90
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.FLEET_URL }}/report",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "day",
+              "value": "={{ $json.day }}"
+            }
+          ]
+        }
+      },
+      "id": "2535d7de-ddba-53a6-a0a1-3c4da5f51cb2",
+      "name": "Fleet core: report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        90
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nreturn [{ json: { ...r, text: `Day ${r.day}: ${r.out}/${r.bikes} out (${r.utilisation_pct}%). Hand-overs today: ${r.handovers_today.join(', ') || 'none'}. Due back: ${r.due_back_today.join(', ') || 'none'}. Overdue: ${r.overdue.join(', ') || 'none'}. In service: ${r.in_service.join(', ') || 'none'}. Open tickets: ${r.open_exceptions.length}.` } }];"
+      },
+      "id": "1228f497-792a-5b88-beb0-1bd46478001e",
+      "name": "Format digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        90
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#ops-daily"
+        },
+        "text": "={{ $json.text }}"
+      },
+      "id": "9a6aa084-687c-5601-9392-c3f13d023f4c",
+      "name": "Post to #ops-daily",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.overdue.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "859eca31-bca1-5967-9637-e9c121e4c061",
+      "name": "Anything overdue?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.OWNER_CHAT_ID }}",
+        "text": "=Overdue bikes: {{ $json.overdue.join(', ') }}"
+      },
+      "id": "f54e5f38-e716-516e-a192-2c7b26e9538a",
+      "name": "Telegram the owner",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        90
+      ]
+    }
+  ],
+  "connections": {
+    "Every day 07:00": {
+      "main": [
+        [
+          {
+            "node": "Day number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Day number": {
+      "main": [
+        [
+          {
+            "node": "Fleet core: report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fleet core: report": {
+      "main": [
+        [
+          {
+            "node": "Format digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format digest": {
+      "main": [
+        [
+          {
+            "node": "Post to #ops-daily",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Anything overdue?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything overdue?": {
+      "main": [
+        [
+          {
+            "node": "Telegram the owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

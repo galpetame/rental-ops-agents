@@ -1,0 +1,226 @@
+{
+  "name": "Rental ops 3: tickets to people",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "id": "c35d1510-0280-5f11-9297-0d9791c9729d",
+      "name": "Every 10 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.FLEET_URL }}/tickets"
+      },
+      "id": "3369d6f1-09c6-5d55-8122-738e29de3100",
+      "name": "Fleet core: open tickets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.id }}"
+      },
+      "id": "6ecc8539-935d-56c9-83df-49ddedd8e081",
+      "name": "Only new ones",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        480,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "mechanic",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.reason }}",
+                    "rightValue": "damage_on_return",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "front desk",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ ['no_valid_license','previous_customer_not_back','handover_blocked','extension_conflict'].includes($json.reason) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "8d8e68c7-40e6-511b-a84b-88f63544c8d3",
+      "name": "Who owns it?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        720,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#mechanic"
+        },
+        "text": "={{ $json.id }} {{ $json.reason }}: bike {{ $json.bike }}"
+      },
+      "id": "a48d8f82-0e1e-5ffb-8ae8-83ebb652517e",
+      "name": "Post to #mechanic",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#front-desk"
+        },
+        "text": "={{ $json.id }} {{ $json.reason }}: booking {{ $json.booking }}"
+      },
+      "id": "153d3988-bb9e-500e-94f3-63185e775831",
+      "name": "Post to #front-desk",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#ops-exceptions"
+        },
+        "text": "={{ $json.id }} {{ $json.reason }}: {{ $json.text }}"
+      },
+      "id": "ebab8ff7-9547-52b4-bcdb-f01753109494",
+      "name": "Post to #ops-exceptions",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        360
+      ]
+    }
+  ],
+  "connections": {
+    "Every 10 minutes": {
+      "main": [
+        [
+          {
+            "node": "Fleet core: open tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fleet core: open tickets": {
+      "main": [
+        [
+          {
+            "node": "Only new ones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only new ones": {
+      "main": [
+        [
+          {
+            "node": "Who owns it?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Who owns it?": {
+      "main": [
+        [
+          {
+            "node": "Post to #mechanic",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Post to #front-desk",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Post to #ops-exceptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

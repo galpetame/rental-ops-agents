@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 986 286" font-family="ui-sans-serif,system-ui,Segoe UI,Arial" font-size="12">
+<rect width="986" height="286" fill="#14181b"/>
+<text x="16" y="24" fill="#e9ecee" font-size="14" font-weight="700">Rental ops 3: tickets to people</text>
+<path d="M166 147.0 C188.0 147.0,188.0 147.0,210 147.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M360 147.0 C382.0 147.0,382.0 147.0,404 147.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M554 147.0 C576.0 147.0,576.0 147.0,598 147.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M748 147.0 C770.0 147.0,770.0 67.0,792 67.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M748 147.0 C770.0 147.0,770.0 147.0,792 147.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M748 147.0 C770.0 147.0,770.0 227.0,792 227.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<rect x="16" y="120.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#b4481e" stroke-width="1.6"/><rect x="16" y="120.0" width="6" height="54" rx="3" fill="#b4481e"/>
+<text x="32" y="152.0" fill="#e9ecee">Every 10 minutes</text>
+<rect x="210" y="120.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#0b6b5c" stroke-width="1.6"/><rect x="210" y="120.0" width="6" height="54" rx="3" fill="#0b6b5c"/>
+<text x="226" y="144.0" fill="#e9ecee">Fleet core: open</text>
+<text x="226" y="160.0" fill="#e9ecee">tickets</text>
+<rect x="404" y="120.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#5d646c" stroke-width="1.6"/><rect x="404" y="120.0" width="6" height="54" rx="3" fill="#5d646c"/>
+<text x="420" y="152.0" fill="#e9ecee">Only new ones</text>
+<rect x="598" y="120.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#5d646c" stroke-width="1.6"/><rect x="598" y="120.0" width="6" height="54" rx="3" fill="#5d646c"/>
+<text x="614" y="152.0" fill="#e9ecee">Who owns it?</text>
+<rect x="792" y="40.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#2f6fb0" stroke-width="1.6"/><rect x="792" y="40.0" width="6" height="54" rx="3" fill="#2f6fb0"/>
+<text x="808" y="72.0" fill="#e9ecee">Post to #mechanic</text>
+<rect x="792" y="120.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#2f6fb0" stroke-width="1.6"/><rect x="792" y="120.0" width="6" height="54" rx="3" fill="#2f6fb0"/>
+<text x="808" y="152.0" fill="#e9ecee">Post to #front-desk</text>
+<rect x="792" y="200.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#2f6fb0" stroke-width="1.6"/><rect x="792" y="200.0" width="6" height="54" rx="3" fill="#2f6fb0"/>
+<text x="808" y="224.0" fill="#e9ecee">Post to</text>
+<text x="808" y="240.0" fill="#e9ecee">#ops-exceptions</text>
+</svg>

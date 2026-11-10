@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 206" font-family="ui-sans-serif,system-ui,Segoe UI,Arial" font-size="12">
+<rect width="1180" height="206" fill="#14181b"/>
+<text x="16" y="24" fill="#e9ecee" font-size="14" font-weight="700">Rental ops 2: daily report</text>
+<path d="M166 107.0 C188.0 107.0,188.0 107.0,210 107.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M360 107.0 C382.0 107.0,382.0 107.0,404 107.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M554 107.0 C576.0 107.0,576.0 107.0,598 107.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M748 107.0 C770.0 107.0,770.0 67.0,792 67.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M748 107.0 C770.0 107.0,770.0 147.0,792 147.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<path d="M942 147.0 C964.0 147.0,964.0 107.0,986 107.0" fill="none" stroke="#6b7680" stroke-width="1.4"/>
+<rect x="16" y="80.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#b4481e" stroke-width="1.6"/><rect x="16" y="80.0" width="6" height="54" rx="3" fill="#b4481e"/>
+<text x="32" y="112.0" fill="#e9ecee">Every day 07:00</text>
+<rect x="210" y="80.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#5d646c" stroke-width="1.6"/><rect x="210" y="80.0" width="6" height="54" rx="3" fill="#5d646c"/>
+<text x="226" y="112.0" fill="#e9ecee">Day number</text>
+<rect x="404" y="80.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#0b6b5c" stroke-width="1.6"/><rect x="404" y="80.0" width="6" height="54" rx="3" fill="#0b6b5c"/>
+<text x="420" y="112.0" fill="#e9ecee">Fleet core: report</text>
+<rect x="598" y="80.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#5d646c" stroke-width="1.6"/><rect x="598" y="80.0" width="6" height="54" rx="3" fill="#5d646c"/>
+<text x="614" y="112.0" fill="#e9ecee">Format digest</text>
+<rect x="792" y="40.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#2f6fb0" stroke-width="1.6"/><rect x="792" y="40.0" width="6" height="54" rx="3" fill="#2f6fb0"/>
+<text x="808" y="72.0" fill="#e9ecee">Post to #ops-daily</text>
+<rect x="792" y="120.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#5d646c" stroke-width="1.6"/><rect x="792" y="120.0" width="6" height="54" rx="3" fill="#5d646c"/>
+<text x="808" y="152.0" fill="#e9ecee">Anything overdue?</text>
+<rect x="986" y="80.0" width="150" height="54" rx="9" fill="#1e2428" stroke="#2f6fb0" stroke-width="1.6"/><rect x="986" y="80.0" width="6" height="54" rx="3" fill="#2f6fb0"/>
+<text x="1002" y="112.0" fill="#e9ecee">Telegram the owner</text>
+</svg>

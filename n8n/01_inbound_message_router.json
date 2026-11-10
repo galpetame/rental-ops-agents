@@ -1,0 +1,399 @@
+{
+  "name": "Rental ops 1: inbound message router",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "3c88cc85-db6c-5168-b297-90451d2972f8",
+      "name": "Telegram in",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ]
+      },
+      "id": "561a337e-6431-58ea-a611-20c7fa9d6e23",
+      "name": "WhatsApp in",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "message"
+        ]
+      },
+      "id": "6b8a5c68-0d55-590f-aad7-cdeb247ea5f7",
+      "name": "Slack in",
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "msg_id",
+              "type": "string",
+              "value": "={{ $json.message?.message_id ?? $json.messages?.[0]?.id ?? $json.ts }}"
+            },
+            {
+              "name": "channel",
+              "type": "string",
+              "value": "={{ $json.message ? 'telegram' : ($json.messages ? 'whatsapp' : 'slack') }}"
+            },
+            {
+              "name": "customer",
+              "type": "string",
+              "value": "={{ $json.message?.from?.id ?? $json.messages?.[0]?.from ?? $json.user }}"
+            },
+            {
+              "name": "text",
+              "type": "string",
+              "value": "={{ $json.message?.text ?? $json.messages?.[0]?.text?.body ?? $json.text }}"
+            }
+          ]
+        }
+      },
+      "id": "aadb6e56-4a55-5310-83d6-d15bc09e1243",
+      "name": "Normalize",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You read one customer message for a bike rental shop and propose exactly one action. Allowed actions: quote, hold, confirm, handover, return, extend, cancel. Reply with JSON {action, args}. If the message is unclear, reply {action: null}. You never promise a bike, a price or a refund: the fleet core decides and writes the reply."
+        }
+      },
+      "id": "33c86714-dd08-55ff-8d4a-1de705bf2f9e",
+      "name": "Propose action (LLM)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        480,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FLEET_URL }}/action",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { msg_id: $('Normalize').item.json.msg_id, channel: $('Normalize').item.json.channel, action: $json.output.action, args: $json.output.args } }}"
+      },
+      "id": "44328b4f-5bde-5f10-b3ef-3b6432be1699",
+      "name": "Fleet core decides",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.escalated }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "5bfe6098-ca0d-5b83-acdc-30b1f5dbabe7",
+      "name": "Escalated?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#ops-exceptions"
+        },
+        "text": "={{ $json.ticket }} {{ $json.escalated }} ({{ $json.channel }})"
+      },
+      "id": "89e65b27-cf19-5a1d-9f7a-1589418544fd",
+      "name": "Ticket to #ops-exceptions",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        90
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "telegram",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": "telegram",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "whatsapp",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": "whatsapp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "slack",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": "slack",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        }
+      },
+      "id": "192bcde0-f542-5d67-bfed-b0b33f196fb7",
+      "name": "Which channel?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1200,
+        270
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.customer }}",
+        "text": "={{ $json.say }}"
+      },
+      "id": "10a8cbb3-786c-50fa-8f29-c0b19b38806d",
+      "name": "Reply on Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "recipientPhoneNumber": "={{ $('Normalize').item.json.customer }}",
+        "textBody": "={{ $json.say }}"
+      },
+      "id": "8f3146a5-fe6b-50c6-9d05-5c6d0ced314c",
+      "name": "Reply on WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Normalize').item.json.customer }}"
+        },
+        "text": "={{ $json.say }}"
+      },
+      "id": "7820d376-5bde-5f35-907c-4ffba3597137",
+      "name": "Reply on Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        360
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram in": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp in": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack in": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Propose action (LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Propose action (LLM)": {
+      "main": [
+        [
+          {
+            "node": "Fleet core decides",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fleet core decides": {
+      "main": [
+        [
+          {
+            "node": "Escalated?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalated?": {
+      "main": [
+        [
+          {
+            "node": "Ticket to #ops-exceptions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Which channel?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Which channel?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Which channel?": {
+      "main": [
+        [
+          {
+            "node": "Reply on Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply on WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply on Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
